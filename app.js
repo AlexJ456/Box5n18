@@ -131,6 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load settings on startup
     loadSettings();
 
+
+    function getMonotonicNow() {
+        return performance.now();
+    }
+
     function getCurrentPhases() {
         const exercise = exerciseTypes[state.exerciseType];
         if (state.exerciseType === 'longExhale') {
@@ -233,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const rect = currentSizingElement.getBoundingClientRect();
         const width = rect.width;
-        const height = rect.height;
+                const height = rect.height;
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.75);
 
         state.viewportWidth = width;
@@ -378,8 +383,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 state.targetRounds = 0;
             }
-            state.pulseStartTime = performance.now();
-            state.startTime = performance.now();
+            const now = getMonotonicNow();
+            state.pulseStartTime = now;
+            state.startTime = now;
             playTone();
             animate();
             requestWakeLock();
@@ -461,9 +467,10 @@ document.addEventListener('DOMContentLoaded', () => {
         state.sessionComplete = false;
         state.timeLimitReached = false;
         state.readyToEndAfterExhale = false;
-        state.pulseStartTime = performance.now();
+        const now = getMonotonicNow();
+        state.pulseStartTime = now;
         state.hasStarted = true;
-        state.startTime = performance.now();
+        state.startTime = now;
         if (audioContext && audioContext.state === 'suspended') {
             audioContext.resume().then(() => {
                 console.log('AudioContext resumed');
@@ -471,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         playTone();
         animate();
-        requestWakeLock();
+                requestWakeLock();
         render();
     }
 
@@ -487,9 +494,10 @@ document.addEventListener('DOMContentLoaded', () => {
         state.sessionComplete = false;
         state.timeLimitReached = false;
         state.readyToEndAfterExhale = false;
-        state.pulseStartTime = performance.now();
+        const now = getMonotonicNow();
+        state.pulseStartTime = now;
         state.hasStarted = true;
-        state.startTime = performance.now();
+        state.startTime = now;
         if (audioContext && audioContext.state === 'suspended') {
             audioContext.resume().then(() => {
                 console.log('AudioContext resumed');
@@ -501,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
         render();
     }
 
-    function drawScene({ progress = 0, phase = state.count, showTrail = state.isPlaying, timestamp = performance.now() } = {}) {
+    function drawScene({ progress = 0, phase = state.count, showTrail = state.isPlaying, timestamp = getMonotonicNow() } = {}) {
         if (!ctx) return;
 
         const width = state.viewportWidth || canvas.clientWidth || canvas.width;
@@ -593,10 +601,10 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.classList.toggle('is-visible', shouldShow);
     }
 
-    function animate() {
+    function animate(timestamp) {
         if (!state.isPlaying) return;
 
-        const now = performance.now();
+        const now = typeof timestamp === 'number' ? timestamp : getMonotonicNow();
         const phases = getCurrentPhases();
         const totalCycleTime = getTotalCycleTime();
         const exhaleIndex = phases.findIndex(p => p.name === 'Exhale');
@@ -710,7 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let html = `
             <h1>${exercise.name}</h1>
-        `;
+                    `;
 
         if (state.isPlaying) {
             // Timer display - show rounds for 4-7-8, time for others
