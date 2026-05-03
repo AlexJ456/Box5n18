@@ -654,14 +654,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPhaseTransition = state.count !== previousCount;
         const exhaleJustCompleted = isPhaseTransition && exhaleIndex >= 0 && previousCount === exhaleIndex;
 
-        const isFinalTimedTransition = exhaleJustCompleted && state.readyToEndAfterExhale && state.timeLimitReached;
-
-        if (isPhaseTransition) {
-            state.pulseStartTime = now;
-            playTone({ isCompletionBell: isFinalTimedTransition });
-            needsRender = true;
-        }
-
         // Track completed rounds for 4-7-8 mode
         // A round is complete when we transition from last phase (exhale) back to first phase (inhale)
         if (isPhaseTransition && previousCount === phases.length - 1 && newCount === 0) {
@@ -683,8 +675,17 @@ document.addEventListener('DOMContentLoaded', () => {
             needsRender = true;
         }
 
+        const isFinalTransition = exhaleJustCompleted && state.readyToEndAfterExhale;
+        const isFinalTimedTransition = isFinalTransition && state.timeLimitReached;
+
+        if (isPhaseTransition) {
+            state.pulseStartTime = now;
+            playTone({ isCompletionBell: isFinalTimedTransition });
+            needsRender = true;
+        }
+
         // All exercise endings are aligned to exhale completion.
-        if (exhaleJustCompleted && state.readyToEndAfterExhale) {
+        if (isFinalTransition) {
             state.sessionComplete = true;
             state.isPlaying = false;
             state.hasStarted = false;
